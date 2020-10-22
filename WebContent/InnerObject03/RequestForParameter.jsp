@@ -14,6 +14,12 @@
 		}
 	}
 %>
+
+<%
+	out.println(request.getMethod());
+	out.println(request.getRemoteAddr());
+%>
+
 <%
 	//POST방식일때 아래 코드 추가(한글처리용)]
 	request.setCharacterEncoding("UTF-8");	
@@ -125,6 +131,7 @@
 			//키값:모든 파라미터명
 			//value:사용자가 입력하거나 선택한 값
 			//getParameterMap():많은 파라미터가 있을때 한꺼번에 받을때 유리
+			
 			Map<String,String[]> params= request.getParameterMap();
 			//파라미터명 얻기
 			Set<String> paramNames= params.keySet();
