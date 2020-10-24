@@ -64,7 +64,12 @@
    	<servlet-name>APPLICATION_1_JSP</servlet-name>
    	<url-pattern>/InnerObject03/Application_1.jsp</url-pattern>
    </servlet-mapping>
-	
+	 <!-- 세션의 유효시간 설정(분단위) -->
+	 <session-config>
+	 	<session-timeout>60</session-timeout>	 
+	 </session-config>
+	 
+	 
 	<!-- 시작 문서 설정 -->
 	<welcome-file-list>
 		<welcome-file>HelloWorld.jsp</welcome-file>
