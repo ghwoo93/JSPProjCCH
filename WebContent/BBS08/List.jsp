@@ -8,16 +8,30 @@
 	pageEncoding="UTF-8"%>
 <%@ include file="/Common/IsMember.jsp" %>
 <%
-
+	//한글처리]
+	request.setCharacterEncoding("UTF-8");	
+	//검색과 관련된 파라미터 받기]
+	String searchColumn = request.getParameter("searchColumn");
+	String searchWord = request.getParameter("searchWord");
+	
+	String queryString="";//검색용 쿼리 스트링
 	//시작 및 끝 행번호 와 검색 관련 데이타 저장용
 	Map map = new HashMap();
+	
+	if(searchColumn !=null){
+		map.put("columnName",searchColumn);
+		map.put("keyword",searchWord);
+		//검색시 생성된 페이징번호 클릭시 처리하기 위한 추가 쿼리스트링
+		queryString=String.format("searchColumn=%s&searchWord=%s&",searchColumn,searchWord);
+		
+	}//////
 	
 
 	//전체 글 목록 가져오기	
 	BBSDao dao = new BBSDao(application,"JSP","JSP");
 	//페이징을 위한 로직 시작]
 	//전체 레코드수	
-	int totalRecordCount = dao.getTotalRowCount();
+	int totalRecordCount = dao.getTotalRowCount(map);
 	//페이지 사이즈 
 	int pageSize=Integer.valueOf(application.getInitParameter("PAGE_SIZE"));
 	//블락페이지
@@ -94,25 +108,28 @@
 								</tr>	
 								<!-- 아래 반복 -->									​
 								<%}else{ 
+									int count=0;
 									for(BBSDto dto:list){
 								
 								%>							​ ​
 
 								<tr style="background-color: white" align="center">
-									<td><%=dto.getNo() %></td>
-									<td style="text-align: left"><a href="View.jsp?no=<%= dto.getNo() %>&nowPage=<%=nowPage%>"><%=dto.getTitle() %></a></td>
+									<td><%=totalRecordCount - (((nowPage - 1) * pageSize) + count)%></td>
+									<td style="text-align: left"><a href="View.jsp?<%=queryString %>no=<%= dto.getNo() %>&nowPage=<%=nowPage%>"><%=dto.getTitle() %></a></td>
 									<td><%=dto.getName() %></td>
 									<td><%=dto.getVisitCount() %></td>
 									<td><%=dto.getPostDate() %></td>
 								</tr>
-								<%}//for
+								<%
+										count++;
+									}//for
 									
 								}//else %>
 							</table>
 							<!-- 페이징 -->
 							<table width="100%">
 								<tr align="center">
-									<td><%=PagingUtil.pagingText(totalRecordCount, pageSize, blockPage, nowPage, "List.jsp?") %></td>
+									<td><%=PagingUtil.pagingText(totalRecordCount, pageSize, blockPage, nowPage, "List.jsp?"+queryString) %></td>
 								</tr>
 							</table>
 

@@ -1,3 +1,5 @@
+<%@page import="java.net.URLDecoder"%>
+<%@page import="java.net.URLEncoder"%>
 <%@page import="java.util.Map"%>
 <%@page import="model.BBSDto"%>
 <%@page import="model.BBSDao"%>
@@ -5,11 +7,27 @@
 	pageEncoding="UTF-8"%>
 <%@ include file="/Common/IsMember.jsp" %>
 <%
+	//한글처리]
+	request.setCharacterEncoding("UTF-8");	
+
 	//1]파라미터(키값) 받기
 	String no = request.getParameter("no");
 	//현재 페이지번호 받기
 	String nowPage = request.getParameter("nowPage");
-	
+	//검색과 관련된 파라미터 받기]
+	String searchColumn = request.getParameter("searchColumn");
+	//EditOk.jsp에서 sendRedirect()로 View.jsp로 검색어 전달시(URLEncoder한 경우) 
+	//URLDecoder.decode()한다
+	String searchWord=null;
+	if(searchColumn !=null){
+		searchWord = URLDecoder.decode(request.getParameter("searchWord"),"UTF-8") ;
+	}
+	out.println("searchWord:"+searchWord);		
+	String queryString="";//검색용 쿼리 스트링
+	if(searchColumn !=null){		
+		//검색시 생성된 페이징번호 클릭시 처리하기 위한 추가 쿼리스트링
+		queryString=String.format("searchColumn=%s&searchWord=%s&",searchColumn,searchWord);
+	}//////
 	
 	//2]CRUD작업용 BbsDAO생성
 	
@@ -38,7 +56,7 @@
 <script>
 	function isDelete(){
 		if(confirm("정말로 삭제 하시겠습니까?")){
-			location.replace("Delete.jsp?no=<%=no%>");
+			location.replace("Delete.jsp?<%=queryString%>no=<%=no%>&nowPage=<%=nowPage%>");
 		}
 	}
 
@@ -103,9 +121,9 @@
 									<tr bgcolor="white" align="center">
 										<td colspan="2">
 										<% if(dto.getId().equals(session.getAttribute("USER_ID"))){ %>
-										<a href="Edit.jsp?no=<%=no%>&nowPage=<%=nowPage%>">수정</a> | <a href="javascript:isDelete()">삭제</a> | 
+										<a href="Edit.jsp?<%=queryString %>no=<%=no%>&nowPage=<%=nowPage%>">수정</a> | <a href="javascript:isDelete()">삭제</a> | 
 										<%} %>
-										<a href="List.jsp?nowPage=<%=nowPage%>">목록</a>
+										<a href="List.jsp?<%=queryString %>nowPage=<%=nowPage%>">목록</a>
 										
 										
 										</td>
