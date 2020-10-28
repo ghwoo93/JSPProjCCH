@@ -7,6 +7,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -74,6 +75,15 @@
 			<!-- 컴파일 오류 발생-속성명이 정해져 있기때문에,즉 게터호출과 같다 -->
 			<li>\${pageContext.noproperty}[에러] : \${pageContext.noproperty}</li>
 		</ul>
+		<h2>숫자를 0으로 나누면 Infinity</h2>
+		\${100/ 0 } : ${100 / 0 }
+		<h2>EL변수에 값 할당시[톰캣 8.0이상부터는 정상. 그 이전 버전 에러]</h2>
+		<c:set var="num" value="100"/>
+		\${num} : ${num}<br/>
+		\${num=3.14} : ${num=3.14}
+		<h2>임의의 변수로 . 을 통해서 접근시-에러 NO,출력 NO</h2>
+		\${mum} : ${mum}<br/>
+		\${mum.name} : ${mum.name}
 	</fieldset>
 </body>
 </html>
