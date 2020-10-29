@@ -8,6 +8,7 @@
 <%
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	String dateString = dateFormat.format(new Date()); 	
+	
 %>
 <!DOCTYPE html>
 <html>
