@@ -48,6 +48,12 @@
 	 	<param-name>ORACLE_DRIVER</param-name>
 	 	<param-value>oracle.jdbc.OracleDriver</param-value>
 	 </context-param>
+	 
+	 <context-param>
+	 	<param-name>JNDI_ROOT</param-name>
+	 	<param-value>java:comp/env</param-value>
+	 </context-param>
+	 
 	 <!-- 페이징 관련 컨텍스트 초기화 파라미터 -->
 	 <context-param>
 	 	<param-name>PAGE_SIZE</param-name>

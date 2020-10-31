@@ -25,8 +25,8 @@
 		 <ul>
 		 	<li>방법1:request 내장객체 - <%=request.getContextPath() %></li>
 		 	<%
-		 	ServletRequest req = pageContext.getRequest();
-		 	String context=((HttpServletRequest)req).getContextPath();
+			 	ServletRequest req = pageContext.getRequest();
+			 	String context=((HttpServletRequest)req).getContextPath();
 		 	%>		 	
 		 	<li>방법2:pageContext내장객체 - <%=context %></li>
 		 	
@@ -156,26 +156,10 @@
 		   <h4>리스트 계열 컬렉션</h4>
 		   <h6>일반 for문</h6>
 		   <ul>
-		   	<%for(int i=0;i < list.size();i++){ %>
-		   		<li><%=list.get(i) %></li>
-		   	<%} %>
 		   </ul>
 		   <h6>확장 for문</h6>
-		   	<%for(MemberDTO member:list){ %>
-		   		<li><%=member %></li>
-		   	<%} %>
 		   <h4>맵 계열 컬렉션</h4>
 		   <ul>
-		   	<%
-		   		Set<String> keys=map.keySet();
-		   		for(String key:keys){
-		   			MemberDTO member=map.get(key);
-		   		%>
-		   		<li><%=key %> : <%=member %></li>
-		   		<%
-		   		}
-		   	%>
-		   
 		   </ul>
 		   
 		   <h2>EL로 출력</h2>
