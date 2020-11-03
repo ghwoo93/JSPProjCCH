@@ -10,7 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletContext;
+import javax.sql.DataSource;
 
 /*
  * DAO(Data Access Object):데이타에 접근해서 CRUD작업을
@@ -24,6 +28,7 @@ public class BBSDao {
 	private PreparedStatement psmt;
 	//[생성자]
 	public BBSDao(ServletContext context,String user,String password) {
+		/*
 		try {
 			//드라이버 로딩]
 			Class.forName(context.getInitParameter("ORACLE_DRIVER"));
@@ -32,6 +37,17 @@ public class BBSDao {
 			System.out.println("데이타 베이스 연결 성공");
 		}
 		catch(ClassNotFoundException | SQLException e) {e.printStackTrace();}
+		*/
+		//커넥션풀 사용하기]	
+		try {
+			Context ctx = new InitialContext();
+			DataSource source=(DataSource)ctx.lookup(context.getInitParameter("JNDI_ROOT")+"/jsp");
+			conn = source.getConnection();
+		}
+		catch(NamingException | SQLException e) {
+			e.printStackTrace();
+		}
+		
 	}//////////////////
 	//자원반납용]
 	public void close() {
@@ -73,7 +89,11 @@ public class BBSDao {
 		//페이징 적용 前 쿼리- 전체 쿼리
 		//String sql="SELECT b.*,name FROM bbs b JOIN member m ON b.id=m.id ORDER BY no DESC";
 		//페이징 적용-구간쿼리로 변경
-		String sql="SELECT * FROM (SELECT T.*,ROWNUM R FROM (SELECT b.*,name FROM bbs b JOIN member m ON b.id=m.id ORDER BY no DESC) T) WHERE R BETWEEN ? AND ?";
+		String sql="SELECT * FROM (SELECT T.*,ROWNUM R FROM (SELECT b.*,name FROM bbs b JOIN member m ON b.id=m.id ";
+		if(map.get("keyword") !=null) {
+			sql+=" WHERE " + map.get("columnName")+" LIKE '%"+map.get("keyword")+"%' ";
+		}
+		sql+=" ORDER BY no DESC) T) WHERE R BETWEEN ? AND ?";
 		
 		try {
 			psmt = conn.prepareStatement(sql);
@@ -93,15 +113,21 @@ public class BBSDao {
 				dto.setName(rs.getString(7));
 				list.add(dto);
 			}
+			
 		}
 		catch(SQLException e) {e.printStackTrace();}
 		return list;
 	}///////////selectList
 	//총 레코드 수 얻기용]
-	public int getTotalRowCount() {
+	public int getTotalRowCount(Map map) {
 		int totalRowCount=0;
 		
-		String sql="SELECT COUNT(*) FROM bbs";
+		//String sql="SELECT COUNT(*) FROM bbs";
+		String sql="SELECT COUNT(*) FROM bbs b JOIN member m ON m.id=b.id ";
+		//검색시 아래 쿼리문 연결
+		if(map.get("keyword") !=null) {
+			sql+=" WHERE " + map.get("columnName")+" LIKE '%"+map.get("keyword")+"%' ";
+		}
 		try {
 			psmt = conn.prepareStatement(sql);
 			rs = psmt.executeQuery();
