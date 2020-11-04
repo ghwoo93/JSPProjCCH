@@ -1,0 +1,9 @@
+
+/* Drop Tables */
+
+DROP TABLE child CASCADE CONSTRAINTS;
+DROP TABLE parent CASCADE CONSTRAINTS;
+
+
+
+

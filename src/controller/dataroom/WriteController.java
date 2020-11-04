@@ -1,6 +1,8 @@
 package controller.dataroom;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -9,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.oreilly.servlet.MultipartRequest;
 
+import model.PBKDF2;
 import model.dataroom.DataRoomDAO;
 import model.dataroom.DataRoomDTO;
 import model.dataroom.FileUtils;
@@ -50,7 +53,21 @@ public class WriteController extends HttpServlet {
 			name = mr.getParameter("name");
 			title = mr.getParameter("title");
 			//비밀번호는 암호화:https://gist.github.com/jtan189/3804290
+			//PBKDF2 JAVA로 검색
+			/*
+			  해시(hash)란 단방향 암호화 기법으로 해시함수(해시 알고리즘)를 이용하여 고정된 길이의 암호화된 문자열로 
+			  바꿔버리는 것을 의미.
+			 해시함수(hash function)는 임의의 길이의 데이터를 고정된 길이의 데이터로 매핑하는 함수. 
+			 이 때 매핑 전 원래 데이터의 값을 키(key), 매핑 후 데이터의 값을 해시값(hash value), 
+			 매핑하는 과정을 해싱(hashing)이라고 한다.
+			 */
+			
 			password = mr.getParameter("password");
+			
+			try {
+				password=PBKDF2.createHash(password);
+			} 
+			catch (Exception e) {e.printStackTrace();} 
 			
 			content = mr.getParameter("content");
 			String attachFile = mr.getFilesystemName("attachFile");

@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.naming.Context;
@@ -12,6 +13,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
+
+import model.PBKDF2;
 
 public class DataRoomDAO {
 	//[멤버변수]
@@ -47,15 +50,19 @@ public class DataRoomDAO {
 	 * 3. 페이징 로직을 리스트 컨트롤러에 추가
 	 * 4. 리스트.JSP페이지에 결과값 출력
 	 */
-	public List<DataRoomDTO> selectList() {
+	public List<DataRoomDTO> selectList(Map map) {
 		List<DataRoomDTO> list = new Vector<DataRoomDTO>();
 		
 		//페이징 적용 전 쿼리
-		String sql="SELECT * FROM dataroom ORDER BY no DESC";
+		//String sql="SELECT * FROM dataroom ORDER BY no DESC";
+		//페이징 적용 쿼리(구간 쿼리)
+		String sql="SELECT * FROM (SELECT T.*,ROWNUM R FROM (SELECT * FROM dataroom ORDER BY no DESC) T) WHERE R BETWEEN ? AND ?";
 		
 		try {
 			psmt = conn.prepareStatement(sql);
-			
+			//시작 및 끝 행번호 설정]
+			psmt.setString(1, map.get("start").toString());
+			psmt.setString(2, map.get("end").toString());
 			rs = psmt.executeQuery();
 			while(rs.next()) {
 				DataRoomDTO dto = new DataRoomDTO();
@@ -74,6 +81,21 @@ public class DataRoomDAO {
 		
 		return list;
 	}/////////////selectList
+	//전체 레코드 수 얻기용]
+	public int getTotalRecordCount() {
+		int totalCount=0;
+		String sql="SELECT COUNT(*) FROM dataroom";
+		try {
+			psmt=conn.prepareStatement(sql);
+			rs=psmt.executeQuery();
+			rs.next();
+			totalCount=rs.getInt(1);
+		} 
+		catch (SQLException e) {e.printStackTrace();}		
+		return totalCount;
+	}////////////////getTotalRecordCount
+	
+	
 	//입력용]
 	public int insert(DataRoomDTO dto) {
 		int affected=0;
@@ -115,4 +137,61 @@ public class DataRoomDAO {
 		
 		return dto;
 	}/////////selectOne
+	//비밀번호 확인]
+	public boolean isCorrectPassword(String no, String password) {
+		String sql="SELECT password FROM dataroom WHERE no=?";
+		
+		try {
+			psmt = conn.prepareStatement(sql);
+			psmt.setString(1, no);
+			rs = psmt.executeQuery();
+			if(rs.next()) {
+				//if(!rs.getString(1).equals(password)) return false;
+				String goodHash=rs.getString(1);				
+				if(!PBKDF2.validatePassword(password, goodHash)) return false;
+			}
+		} 
+		catch (Exception e) {e.printStackTrace();return false;}
+		return true;
+	}///////////isCorrectPassword
+	//삭제용]
+	public int delete(String no) {
+		int affected=0;
+		String sql="DELETE dataroom WHERE no=?";
+		try {
+			psmt = conn.prepareStatement(sql);
+			psmt.setString(1, no);			
+			affected= psmt.executeUpdate();
+		}
+		catch(SQLException e) {e.printStackTrace();}		
+		return affected;
+	}////////delete
+	//수정용]
+	public int update(DataRoomDTO dto) {
+		int affected=0;
+		String sql="UPDATE dataroom SET name=?,title=?,content=?,attachFile=? WHERE no=?";
+		try {
+			psmt = conn.prepareStatement(sql);
+			psmt.setString(1, dto.getName());
+			psmt.setString(2, dto.getTitle());
+			psmt.setString(4, dto.getAttachFile());
+			psmt.setString(3, dto.getContent());
+			psmt.setString(5, dto.getNo());
+			affected= psmt.executeUpdate();
+		}
+		catch(SQLException e) {e.printStackTrace();}
+		
+		return affected;
+	}///////////////////update
+	//다운로드  수 증가용
+	public void updateDownCount(String no) {
+		String sql="UPDATE dataroom SET downcount=downcount+1 WHERE no=?";
+		try {
+			psmt = conn.prepareStatement(sql);
+			psmt.setString(1, no);
+			psmt.executeUpdate();
+		}
+		catch(SQLException e) {e.printStackTrace();}
+		
+	}////////////updateDownCount
 }
